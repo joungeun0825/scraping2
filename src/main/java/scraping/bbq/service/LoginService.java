@@ -20,11 +20,11 @@ public class LoginService {
     @Getter
     private String sessionCookie;
 
-    public int login() {
+    public int login(String username, String password) {
         // 폼 데이터 설정
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("username", "ll001122"); // 아이디
-        formData.add("password", "infotech@30"); // 비밀번호
+        formData.add("username", username); // 아이디
+        formData.add("password", password); // 비밀번호
         formData.add("redirect", "false");
         formData.add("csrfToken", "1bc198b047ca87351c17239442c24551728d996c1cddf390da54449e741d4738");
         formData.add("callbackUrl", "https://bbq.co.kr/member/login");

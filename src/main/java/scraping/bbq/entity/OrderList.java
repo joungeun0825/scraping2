@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import scraping.bbq.dto.MappingDto;
-import scraping.bbq.dto.OrderDto;
 
 import java.util.List;
 
@@ -20,6 +19,9 @@ public class OrderList {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "orderList", orphanRemoval = true)
     private List<Order> order;
+
+    public OrderList() {
+    }
 
     public OrderList(MappingDto mappingDto) {
         this.totalPrice = mappingDto.getTotalPrice();
