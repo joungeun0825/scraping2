@@ -8,8 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestClient;
 import scraping.bbq.dto.CsrfDto;
+import scraping.bbq.dto.LoginRequest;
 import scraping.bbq.util.CookieUtil;
 
 import java.util.List;
@@ -25,12 +27,12 @@ public class LoginService {
     private String sessionCookie;
     private String csrfToken;
 
-    public int login(String username, String password) {
+    public int login(LoginRequest loginRequest) {
         getCsrfToken();
         // 폼 데이터 설정
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("username", username); // 아이디
-        formData.add("password", password); // 비밀번호
+        formData.add("username", loginRequest.getUsername()); // 아이디
+        formData.add("password", loginRequest.getPassword()); // 비밀번호
         formData.add("redirect", "false");
         formData.add("csrfToken", csrfToken);
         formData.add("callbackUrl", "https://bbq.co.kr/member/login");
