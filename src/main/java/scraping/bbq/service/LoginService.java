@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
+import scraping.bbq.dto.CsrfDto;
+import scraping.bbq.util.CookieUtil;
 
 import java.util.List;
 
@@ -16,17 +18,21 @@ import java.util.List;
 @Service
 public class LoginService {
 
+    private final String CSRF_URI = "/api/auth/csrf";
+
     private final RestClient restClient;
     @Getter
     private String sessionCookie;
+    private String csrfToken;
 
     public int login(String username, String password) {
+        getCsrfToken();
         // 폼 데이터 설정
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("username", username); // 아이디
         formData.add("password", password); // 비밀번호
         formData.add("redirect", "false");
-        formData.add("csrfToken", "1bc198b047ca87351c17239442c24551728d996c1cddf390da54449e741d4738");
+        formData.add("csrfToken", csrfToken);
         formData.add("callbackUrl", "https://bbq.co.kr/member/login");
         formData.add("json", "true");
 
@@ -37,18 +43,24 @@ public class LoginService {
                 .header(HttpHeaders.ACCEPT, "*/*")
                 .header(HttpHeaders.ORIGIN, "https://bbq.co.kr")
                 .header(HttpHeaders.REFERER, "https://bbq.co.kr/member/login")
-                .header(HttpHeaders.COOKIE, "__Host-next-auth.csrf-token=1bc198b047ca87351c17239442c24551728d996c1cddf390da54449e741d4738%7C48d144b5106da48fa68290ded1c3e34fc87f93613e8c1e99d85409e89d4c1af5; _ga=GA1.1.372589340.1739860869")
+                .header(HttpHeaders.COOKIE, sessionCookie)
                 .body(formData)
                 .retrieve()
                 .toBodilessEntity();
 
-        // Cookie 추출
-        List<String> cookies = response.getHeaders().get(HttpHeaders.SET_COOKIE);
-        if (cookies != null && !cookies.isEmpty()) {
-            sessionCookie = String.join("; ", cookies);
-        }
+        sessionCookie = CookieUtil.getCookie(response);
 
         return response.getStatusCode().value();
+    }
+
+    private void getCsrfToken() {
+        ResponseEntity<CsrfDto> response = restClient.get()
+                .uri(CSRF_URI)
+                .retrieve()
+                .toEntity(CsrfDto.class);
+
+        sessionCookie = CookieUtil.getCookie(response);
+        csrfToken = response.getBody().getCsrfToken();
     }
 
 }
